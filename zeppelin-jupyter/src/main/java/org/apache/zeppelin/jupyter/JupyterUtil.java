@@ -52,6 +52,8 @@ import org.apache.zeppelin.jupyter.zformat.Result;
 import org.apache.zeppelin.jupyter.zformat.TypeData;
 import org.apache.zeppelin.markdown.MarkdownParser;
 import org.apache.zeppelin.markdown.PegdownParser;
+import org.apache.zeppelin.notebook.utility.IdHashes;
+import py4j.GatewayServer;
 
 /**
  *
@@ -258,27 +260,13 @@ public class JupyterUtil {
     return nbformat.toString();
   }
 
+  public String generateId() {
+    return IdHashes.generateId();
+  }
+
   public static void main(String[] args) throws ParseException, IOException {
-    Options options = new Options();
-    options.addOption("i", true, "Jupyter notebook file");
-    options.addOption("o", true, "Zeppelin note file. Default: note.json");
-
-    CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = parser.parse(options, args);
-
-    if (!cmd.hasOption("i")) {
-      new HelpFormatter().printHelp("java " + JupyterUtil.class.getName(), options);
-      System.exit(1);
-    }
-
-    Path jupyterPath = Paths.get(cmd.getOptionValue("i"));
-    Path zeppelinPath = Paths.get(cmd.hasOption("o") ? cmd.getOptionValue("o") : "note.json");
-
-    try (BufferedReader in = new BufferedReader(new FileReader(jupyterPath.toFile()));
-        FileWriter fw = new FileWriter(zeppelinPath.toFile())) {
-      Note note = new JupyterUtil().getNote(in, "%python", "%md");
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      gson.toJson(note, fw);
-    }
+    GatewayServer gatewayServer = new GatewayServer(new JupyterUtil());
+    gatewayServer.start();
+    System.out.println("Gateway Server Started");
   }
 }
