@@ -175,6 +175,8 @@ function WebsocketEventFactory ($rootScope, $websocket, $location, baseUrlSrv, s
       $rootScope.$broadcast('updateParaInfos', data)
     } else if (op === 'CONVERT_NOTE_NBFORMAT') {
       saveAsService.saveAs(data.nbformat, data.name, 'zepp.ipynb')
+    } else if (op === 'WRITE_LOG_TO_WEBSOCKET') {
+      console.log(data.log)
     } else {
       console.error(`unknown websocket op: ${op}`)
     }

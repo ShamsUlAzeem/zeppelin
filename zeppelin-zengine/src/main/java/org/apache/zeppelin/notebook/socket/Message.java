@@ -65,6 +65,8 @@ public class Message implements JsonSerializable {
 
     NOTE_RENAME,
 
+    WRITE_LOG_TO_WEBSOCKET,
+
     CONVERT_NOTE_NBFORMAT,     // converting note to nbformat
 
     UPDATE_PERSONALIZED_MODE, // [c-s] update personalized mode (boolean)

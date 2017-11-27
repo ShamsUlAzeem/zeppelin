@@ -33,6 +33,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileSystemException;
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Level;
+import org.apache.log4j.spi.LoggingEvent;
 import org.apache.zeppelin.conf.ZeppelinConfiguration;
 import org.apache.zeppelin.conf.ZeppelinConfiguration.ConfVars;
 import org.apache.zeppelin.display.AngularObject;
@@ -312,6 +315,61 @@ public class NotebookServer extends WebSocketServlet
           completion(conn, userAndRoles, notebook, messagereceived);
           break;
         case PING:
+
+          final NotebookSocket innerConn = conn;
+
+          org.apache.log4j.Logger.getRootLogger().addAppender(new AppenderSkeleton() {
+            @Override
+            protected void append(LoggingEvent event) {
+              String message = null;
+              if (event.locationInformationExists()){
+                message = event.getLocationInformation().getClassName() +
+                        "." +
+                        event.getLocationInformation().getMethodName() +
+                        ":" +
+                        event.getLocationInformation().getLineNumber() +
+                        " - " +
+                        event.getMessage().toString();
+              } else {
+                message = event.getMessage().toString();
+              }
+              Message resp = new Message(OP.WRITE_LOG_TO_WEBSOCKET)
+                      .put("log", message);
+              try {
+                innerConn.send(serializeMessage(resp));
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+
+              switch (event.getLevel().toInt()){
+                case Level.INFO_INT:
+                  //your decision
+                  break;
+                case Level.DEBUG_INT:
+                  //your decision
+                  break;
+                case Level.ERROR_INT:
+                  //your decision
+                  break;
+                case Level.WARN_INT:
+                  //your decision
+                  break;
+                case Level.TRACE_INT:
+                  //your decision
+                  break;
+                default:
+                  //your decision
+                  break;
+              }
+            }
+            @Override
+            public void close() {
+            }
+            @Override
+            public boolean requiresLayout() {
+              return false;
+            }
+          });
           break; //do nothing
         case ANGULAR_OBJECT_UPDATED:
           angularObjectUpdated(conn, userAndRoles, notebook, messagereceived);
